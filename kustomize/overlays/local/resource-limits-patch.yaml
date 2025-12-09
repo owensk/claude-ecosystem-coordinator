@@ -1,0 +1,102 @@
+# Reduced resource limits for local development on Rancher Desktop
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecosystem-core
+spec:
+  template:
+    spec:
+      containers:
+        - name: ecosystem-core
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: feature-registry
+spec:
+  template:
+    spec:
+      containers:
+        - name: feature-registry
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: async-runner
+spec:
+  template:
+    spec:
+      containers:
+        - name: async-runner
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sdlc-workflow-manager
+spec:
+  template:
+    spec:
+      containers:
+        - name: sdlc-workflow-manager
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-manager
+spec:
+  template:
+    spec:
+      containers:
+        - name: test-manager
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: episodic-memory
+spec:
+  template:
+    spec:
+      containers:
+        - name: episodic-memory
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 512Mi

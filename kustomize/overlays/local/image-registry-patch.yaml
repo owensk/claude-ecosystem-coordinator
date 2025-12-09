@@ -1,0 +1,96 @@
+# Patch deployments to use local registry or pull policy for development
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecosystem-core
+spec:
+  template:
+    spec:
+      containers:
+        - name: ecosystem-core
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: ENVIRONMENT
+              value: "local"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: feature-registry
+spec:
+  template:
+    spec:
+      containers:
+        - name: feature-registry
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: ENVIRONMENT
+              value: "local"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: async-runner
+spec:
+  template:
+    spec:
+      containers:
+        - name: async-runner
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: ENVIRONMENT
+              value: "local"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sdlc-workflow-manager
+spec:
+  template:
+    spec:
+      containers:
+        - name: sdlc-workflow-manager
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: ENVIRONMENT
+              value: "local"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-manager
+spec:
+  template:
+    spec:
+      containers:
+        - name: test-manager
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: ENVIRONMENT
+              value: "local"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: episodic-memory
+spec:
+  template:
+    spec:
+      containers:
+        - name: episodic-memory
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: ENVIRONMENT
+              value: "local"

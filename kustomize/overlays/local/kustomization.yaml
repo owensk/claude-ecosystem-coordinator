@@ -1,0 +1,105 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Namespace for local deployment
+namespace: claude-ecosystem-local
+
+# Common labels for all resources
+commonLabels:
+  environment: local
+  deployment-type: rancher-desktop
+
+# Common annotations
+commonAnnotations:
+  managed-by: kustomize
+  overlay: local
+
+# Resource references (base would be helm template output)
+# In practice, you would run: helm template ecosystem ./helm/ecosystem > base/resources.yaml
+resources:
+  - namespace.yaml
+  - storage-class.yaml
+
+# Strategic merge patches for local environment
+patchesStrategicMerge:
+  - service-nodeport-patch.yaml
+  - resource-limits-patch.yaml
+  - image-registry-patch.yaml
+
+# JSON patches for specific modifications
+patchesJson6902:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: .*
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: ENVIRONMENT
+          value: local
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: LOG_LEVEL
+          value: DEBUG
+
+# Configuration for local environment
+configMapGenerator:
+  - name: local-config
+    literals:
+      - ENVIRONMENT=local
+      - KUBERNETES_PROVIDER=rancher-desktop
+      - ENABLE_DEBUG=true
+      - LOG_LEVEL=DEBUG
+      - STORAGE_TYPE=local-path
+    options:
+      disableNameSuffixHash: false
+
+# Secret generator for local credentials (dev only)
+secretGenerator:
+  - name: local-secrets
+    literals:
+      - POSTGRES_PASSWORD=local_dev_pass
+      - REDIS_PASSWORD=local_dev_pass
+      - JWT_SECRET=local_jwt_secret_change_in_prod
+    type: Opaque
+    options:
+      disableNameSuffixHash: false
+
+# Images - use local registry or Docker Hub
+images:
+  - name: ecosystem-core
+    newName: localhost:5000/ecosystem-core
+    newTag: local
+  - name: feature-registry
+    newName: localhost:5000/feature-registry
+    newTag: local
+  - name: async-runner
+    newName: localhost:5000/async-runner
+    newTag: local
+  - name: sdlc-workflow-manager
+    newName: localhost:5000/sdlc-workflow-manager
+    newTag: local
+  - name: test-manager
+    newName: localhost:5000/test-manager
+    newTag: local
+  - name: episodic-memory
+    newName: localhost:5000/episodic-memory
+    newTag: local
+
+# Replicas for local deployment (reduce resource usage)
+replicas:
+  - name: ecosystem-core
+    count: 1
+  - name: feature-registry
+    count: 1
+  - name: async-runner
+    count: 1
+  - name: sdlc-workflow-manager
+    count: 1
+  - name: test-manager
+    count: 1
+  - name: episodic-memory
+    count: 1
