@@ -1,0 +1,77 @@
+# Service configuration for Docker Compose
+# Services communicate via container names on internal network
+
+version: "1.0"
+mode: docker
+
+services:
+  feature-registry:
+    grpc:
+      host: ecosystem-feature-registry
+      port: 50051
+    rest:
+      host: ecosystem-feature-registry
+      port: 8080
+    mcp:
+      host: ecosystem-feature-registry
+      port: 9000
+
+  ecosystem-core:
+    grpc:
+      host: ecosystem-core
+      port: 50051
+    rest:
+      host: ecosystem-core
+      port: 8080
+    mcp:
+      host: ecosystem-core
+      port: 9000
+
+  claude-arena:
+    grpc:
+      host: ecosystem-claude-arena
+      port: 50051
+    rest:
+      host: ecosystem-claude-arena
+      port: 8080
+    mcp:
+      host: ecosystem-claude-arena
+      port: 9000
+
+  sdlc-workflow-manager:
+    grpc:
+      host: ecosystem-sdlc-workflow
+      port: 50051
+    rest:
+      host: ecosystem-sdlc-workflow
+      port: 8080
+    mcp:
+      host: ecosystem-sdlc-workflow
+      port: 9000
+
+  test-manager:
+    grpc:
+      host: ecosystem-test-manager
+      port: 50051
+    rest:
+      host: ecosystem-test-manager
+      port: 8080
+    mcp:
+      host: ecosystem-test-manager
+      port: 9000
+
+  async-runner:
+    grpc:
+      host: ecosystem-async-runner
+      port: 50051
+    rest:
+      host: ecosystem-async-runner
+      port: 8080
+    mcp:
+      host: ecosystem-async-runner
+      port: 9000
+
+infrastructure:
+  redis:
+    host: ecosystem-redis
+    port: 6379

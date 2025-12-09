@@ -1,0 +1,199 @@
+version: "3.8"
+
+services:
+  # Infrastructure
+  redis:
+    image: redis:7-alpine
+    container_name: ecosystem-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ecosystem
+
+  # Feature Registry
+  feature-registry:
+    build:
+      context: ../../claude-feature-registry
+      dockerfile: Dockerfile
+    container_name: ecosystem-feature-registry
+    ports:
+      - "50051:50051"  # gRPC
+      - "8080:8080"    # REST
+      - "9000:9000"    # MCP
+    volumes:
+      - feature-registry-data:/app/data
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - GRPC_PORT=50051
+      - REST_PORT=8080
+      - MCP_PORT=9000
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 10s
+      retries: 3
+    networks:
+      - ecosystem
+
+  # Ecosystem Core
+  ecosystem-core:
+    build:
+      context: ../../claude-ecosystem-core
+      dockerfile: Dockerfile
+    container_name: ecosystem-core
+    ports:
+      - "50052:50051"  # gRPC
+      - "8081:8080"    # REST
+      - "9001:9000"    # MCP
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - GRPC_PORT=50051
+      - REST_PORT=8080
+      - MCP_PORT=9000
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 10s
+      retries: 3
+    networks:
+      - ecosystem
+
+  # Claude Arena
+  claude-arena:
+    build:
+      context: ../../claude-arena
+      dockerfile: Dockerfile
+    container_name: ecosystem-claude-arena
+    ports:
+      - "50053:50051"  # gRPC
+      - "8082:8080"    # REST
+      - "9002:9000"    # MCP
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - GRPC_PORT=50051
+      - REST_PORT=8080
+      - MCP_PORT=9000
+    depends_on:
+      redis:
+        condition: service_healthy
+      ecosystem-core:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 10s
+      retries: 3
+    networks:
+      - ecosystem
+
+  # SDLC Workflow Manager
+  sdlc-workflow-manager:
+    build:
+      context: ../../claude-sdlc-workflow-manager
+      dockerfile: Dockerfile
+    container_name: ecosystem-sdlc-workflow
+    ports:
+      - "50054:50051"  # gRPC
+      - "8083:8080"    # REST
+      - "9003:9000"    # MCP
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - GRPC_PORT=50051
+      - REST_PORT=8080
+      - MCP_PORT=9000
+    depends_on:
+      redis:
+        condition: service_healthy
+      ecosystem-core:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 10s
+      retries: 3
+    networks:
+      - ecosystem
+
+  # Test Manager
+  test-manager:
+    build:
+      context: ../../claude-test-manager
+      dockerfile: Dockerfile
+    container_name: ecosystem-test-manager
+    ports:
+      - "50055:50051"  # gRPC
+      - "8084:8080"    # REST
+      - "9004:9000"    # MCP
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - GRPC_PORT=50051
+      - REST_PORT=8080
+      - MCP_PORT=9000
+    depends_on:
+      redis:
+        condition: service_healthy
+      ecosystem-core:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 10s
+      retries: 3
+    networks:
+      - ecosystem
+
+  # Async Runner
+  async-runner:
+    build:
+      context: ../../claude-async-runner
+      dockerfile: Dockerfile
+    container_name: ecosystem-async-runner
+    ports:
+      - "50056:50051"  # gRPC
+      - "8085:8080"    # REST
+      - "9005:9000"    # MCP
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - GRPC_PORT=50051
+      - REST_PORT=8080
+      - MCP_PORT=9000
+    depends_on:
+      redis:
+        condition: service_healthy
+      ecosystem-core:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 10s
+      retries: 3
+    networks:
+      - ecosystem
+
+networks:
+  ecosystem:
+    driver: bridge
+
+volumes:
+  redis-data:
+  feature-registry-data:

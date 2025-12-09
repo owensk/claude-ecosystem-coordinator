@@ -1,0 +1,58 @@
+{
+  "mcpServers": {
+    "feature-registry": {
+      "command": "{{PYTHON_PATH}}",
+      "args": ["-m", "feature_registry.mcp.server"],
+      "env": {
+        "MCP_PORT": "{{FEATURE_REGISTRY_MCP_PORT}}",
+        "GRPC_HOST": "{{FEATURE_REGISTRY_GRPC_HOST}}",
+        "GRPC_PORT": "{{FEATURE_REGISTRY_GRPC_PORT}}"
+      }
+    },
+    "ecosystem-core": {
+      "command": "{{PYTHON_PATH}}",
+      "args": ["-m", "ecosystem_core.mcp.server"],
+      "env": {
+        "MCP_PORT": "{{ECOSYSTEM_CORE_MCP_PORT}}",
+        "GRPC_HOST": "{{ECOSYSTEM_CORE_GRPC_HOST}}",
+        "GRPC_PORT": "{{ECOSYSTEM_CORE_GRPC_PORT}}"
+      }
+    },
+    "claude-arena": {
+      "command": "{{PYTHON_PATH}}",
+      "args": ["-m", "claude_arena.mcp.server"],
+      "env": {
+        "MCP_PORT": "{{CLAUDE_ARENA_MCP_PORT}}",
+        "GRPC_HOST": "{{CLAUDE_ARENA_GRPC_HOST}}",
+        "GRPC_PORT": "{{CLAUDE_ARENA_GRPC_PORT}}"
+      }
+    },
+    "sdlc-workflow-manager": {
+      "command": "{{PYTHON_PATH}}",
+      "args": ["-m", "sdlc_workflow_manager.mcp.server"],
+      "env": {
+        "MCP_PORT": "{{SDLC_WORKFLOW_MCP_PORT}}",
+        "GRPC_HOST": "{{SDLC_WORKFLOW_GRPC_HOST}}",
+        "GRPC_PORT": "{{SDLC_WORKFLOW_GRPC_PORT}}"
+      }
+    },
+    "test-manager": {
+      "command": "{{PYTHON_PATH}}",
+      "args": ["-m", "test_manager.mcp.server"],
+      "env": {
+        "MCP_PORT": "{{TEST_MANAGER_MCP_PORT}}",
+        "GRPC_HOST": "{{TEST_MANAGER_GRPC_HOST}}",
+        "GRPC_PORT": "{{TEST_MANAGER_GRPC_PORT}}"
+      }
+    },
+    "async-runner": {
+      "command": "{{PYTHON_PATH}}",
+      "args": ["-m", "async_runner.mcp.server"],
+      "env": {
+        "MCP_PORT": "{{ASYNC_RUNNER_MCP_PORT}}",
+        "GRPC_HOST": "{{ASYNC_RUNNER_GRPC_HOST}}",
+        "GRPC_PORT": "{{ASYNC_RUNNER_GRPC_PORT}}"
+      }
+    }
+  }
+}
