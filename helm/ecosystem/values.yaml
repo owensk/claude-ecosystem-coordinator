@@ -1,0 +1,221 @@
+# Global values for the Claude Ecosystem
+global:
+  # Global image settings
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: ""
+
+  # Global networking
+  domain: "claude.local"
+  tlsEnabled: false
+
+  # Global database connection
+  postgresql:
+    host: "postgresql"
+    port: 5432
+    existingSecret: "ecosystem-postgresql"
+
+  # Global Redis connection
+  redis:
+    host: "redis-master"
+    port: 6379
+    existingSecret: "ecosystem-redis"
+
+  # Global monitoring
+  monitoring:
+    enabled: false
+    prometheus:
+      enabled: false
+    grafana:
+      enabled: false
+
+  # Global tracing
+  tracing:
+    enabled: false
+    jaeger:
+      endpoint: ""
+
+  # Global logging
+  logging:
+    level: "INFO"
+    format: "json"
+
+# Service-specific overrides
+ecosystem-core:
+  enabled: true
+  replicaCount: 2
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+feature-registry:
+  enabled: true
+  replicaCount: 2
+  service:
+    type: ClusterIP
+    port: 8081
+    grpcPort: 9091
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+async-runner:
+  enabled: true
+  replicaCount: 3
+  service:
+    type: ClusterIP
+    port: 8082
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+
+sdlc-workflow-manager:
+  enabled: true
+  replicaCount: 2
+  service:
+    type: ClusterIP
+    port: 8083
+    grpcPort: 9093
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+test-manager:
+  enabled: true
+  replicaCount: 2
+  service:
+    type: ClusterIP
+    port: 8084
+    grpcPort: 9094
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+episodic-memory:
+  enabled: true
+  replicaCount: 2
+  service:
+    type: ClusterIP
+    port: 8085
+  persistence:
+    enabled: true
+    size: 10Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+# Ingress configuration (managed by umbrella chart)
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  hosts:
+    - host: claude.local
+      paths:
+        - path: /api/core
+          pathType: Prefix
+          service: ecosystem-core
+          port: 8080
+        - path: /api/features
+          pathType: Prefix
+          service: feature-registry
+          port: 8081
+        - path: /api/async
+          pathType: Prefix
+          service: async-runner
+          port: 8082
+        - path: /api/sdlc
+          pathType: Prefix
+          service: sdlc-workflow-manager
+          port: 8083
+        - path: /api/tests
+          pathType: Prefix
+          service: test-manager
+          port: 8084
+        - path: /api/memory
+          pathType: Prefix
+          service: episodic-memory
+          port: 8085
+  tls:
+    - secretName: claude-ecosystem-tls
+      hosts:
+        - claude.local
+
+# gRPC Ingress (separate from HTTP)
+ingressGrpc:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  hosts:
+    - host: grpc.claude.local
+      paths:
+        - path: /feature.FeatureRegistry
+          pathType: Prefix
+          service: feature-registry
+          port: 9091
+        - path: /sdlc.WorkflowManager
+          pathType: Prefix
+          service: sdlc-workflow-manager
+          port: 9093
+        - path: /test.TestManager
+          pathType: Prefix
+          service: test-manager
+          port: 9094
+  tls:
+    - secretName: claude-ecosystem-grpc-tls
+      hosts:
+        - grpc.claude.local
+
+# PostgreSQL (external or subchart)
+postgresql:
+  enabled: false
+  external:
+    host: ""
+    port: 5432
+    database: "ecosystem"
+    username: "ecosystem"
+    existingSecret: "ecosystem-postgresql"
+
+# Redis (external or subchart)
+redis:
+  enabled: false
+  external:
+    host: ""
+    port: 6379
+    existingSecret: "ecosystem-redis"

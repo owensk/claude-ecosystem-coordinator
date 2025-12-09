@@ -1,0 +1,65 @@
+apiVersion: v2
+name: claude-ecosystem
+description: Umbrella Helm chart for the complete Claude Ecosystem
+type: application
+version: 0.42.0
+appVersion: "0.42.0"
+
+keywords:
+  - claude
+  - ecosystem
+  - microservices
+  - platform
+
+maintainers:
+  - name: Claude Ecosystem Team
+    email: ecosystem@example.com
+
+dependencies:
+  - name: ecosystem-core
+    version: ">=0.1.0"
+    repository: "file://../../../claude-ecosystem-core/helm"
+    condition: ecosystem-core.enabled
+    tags:
+      - core
+      - required
+
+  - name: feature-registry
+    version: ">=0.1.0"
+    repository: "file://../../../claude-feature-registry/helm"
+    condition: feature-registry.enabled
+    tags:
+      - registry
+      - required
+
+  - name: async-runner
+    version: ">=0.1.0"
+    repository: "file://../../../claude-async-runner/helm"
+    condition: async-runner.enabled
+    tags:
+      - execution
+
+  - name: sdlc-workflow-manager
+    version: ">=0.1.0"
+    repository: "file://../../../claude-sdlc-workflow-manager/helm"
+    condition: sdlc-workflow-manager.enabled
+    tags:
+      - workflow
+
+  - name: test-manager
+    version: ">=0.1.0"
+    repository: "file://../../../claude-test-manager/helm"
+    condition: test-manager.enabled
+    tags:
+      - testing
+
+  - name: episodic-memory
+    version: ">=0.1.0"
+    repository: "file://../../../claude-episodic-memory/helm"
+    condition: episodic-memory.enabled
+    tags:
+      - memory
+
+annotations:
+  category: Platform
+  licenses: MIT

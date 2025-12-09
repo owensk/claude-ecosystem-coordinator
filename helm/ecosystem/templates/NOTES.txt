@@ -1,0 +1,61 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Your release is named {{ .Release.Name }}.
+
+To learn more about the release, try:
+
+  $ helm status {{ .Release.Name }}
+  $ helm get all {{ .Release.Name }}
+
+{{ if .Values.ingress.enabled -}}
+The Claude Ecosystem HTTP/REST API is available at:
+{{- range .Values.ingress.hosts }}
+  http{{ if $.Values.global.tlsEnabled }}s{{ end }}://{{ .host }}
+{{- end }}
+
+Available endpoints:
+  - Core API:     {{ (index .Values.ingress.hosts 0).host }}/api/core
+  - Features:     {{ (index .Values.ingress.hosts 0).host }}/api/features
+  - Async Runner: {{ (index .Values.ingress.hosts 0).host }}/api/async
+  - SDLC:         {{ (index .Values.ingress.hosts 0).host }}/api/sdlc
+  - Tests:        {{ (index .Values.ingress.hosts 0).host }}/api/tests
+  - Memory:       {{ (index .Values.ingress.hosts 0).host }}/api/memory
+{{- end }}
+
+{{ if .Values.ingressGrpc.enabled -}}
+The Claude Ecosystem gRPC API is available at:
+{{- range .Values.ingressGrpc.hosts }}
+  grpc{{ if $.Values.global.tlsEnabled }}s{{ end }}://{{ .host }}
+{{- end }}
+
+Available gRPC services:
+  - Feature Registry:     {{ (index .Values.ingressGrpc.hosts 0).host }}/feature.FeatureRegistry
+  - SDLC Workflow:        {{ (index .Values.ingressGrpc.hosts 0).host }}/sdlc.WorkflowManager
+  - Test Manager:         {{ (index .Values.ingressGrpc.hosts 0).host }}/test.TestManager
+{{- end }}
+
+Enabled services:
+{{- if index .Values "ecosystem-core" "enabled" }}
+  ✓ Ecosystem Core
+{{- end }}
+{{- if index .Values "feature-registry" "enabled" }}
+  ✓ Feature Registry
+{{- end }}
+{{- if index .Values "async-runner" "enabled" }}
+  ✓ Async Runner
+{{- end }}
+{{- if index .Values "sdlc-workflow-manager" "enabled" }}
+  ✓ SDLC Workflow Manager
+{{- end }}
+{{- if index .Values "test-manager" "enabled" }}
+  ✓ Test Manager
+{{- end }}
+{{- if index .Values "episodic-memory" "enabled" }}
+  ✓ Episodic Memory
+{{- end }}
+
+To check the status of all services:
+  $ kubectl get pods -l app.kubernetes.io/instance={{ .Release.Name }}
+
+For more information, visit:
+  https://github.com/owensk/claude-ecosystem
