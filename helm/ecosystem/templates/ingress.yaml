@@ -1,0 +1,50 @@
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include "claude-ecosystem.fullname" . -}}
+{{- $ingressApiVersion := include "claude-ecosystem.ingress.apiVersion" . -}}
+apiVersion: {{ $ingressApiVersion }}
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-http
+  labels:
+    {{- include "claude-ecosystem.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            {{- if eq $ingressApiVersion "networking.k8s.io/v1" }}
+            pathType: {{ .pathType | default "Prefix" }}
+            {{- end }}
+            backend:
+              {{- if eq $ingressApiVersion "networking.k8s.io/v1" }}
+              service:
+                name: {{ printf "%s-%s" $.Release.Name .service }}
+                port:
+                  number: {{ .port }}
+              {{- else }}
+              serviceName: {{ printf "%s-%s" $.Release.Name .service }}
+              servicePort: {{ .port }}
+              {{- end }}
+          {{- end }}
+    {{- end }}
+{{- end }}

@@ -1,0 +1,56 @@
+{{- if .Values.ingressGrpc.enabled -}}
+{{- $fullName := include "claude-ecosystem.fullname" . -}}
+{{- $ingressApiVersion := include "claude-ecosystem.ingress.apiVersion" . -}}
+apiVersion: {{ $ingressApiVersion }}
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-grpc
+  labels:
+    {{- include "claude-ecosystem.labels" . | nindent 4 }}
+    app.kubernetes.io/component: grpc-ingress
+  annotations:
+    # gRPC-specific annotations
+    nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+    nginx.ingress.kubernetes.io/grpc-backend: "true"
+    # Traefik gRPC annotations (if using Traefik)
+    traefik.ingress.kubernetes.io/router.entrypoints: grpc
+    {{- with .Values.ingressGrpc.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- if .Values.ingressGrpc.className }}
+  ingressClassName: {{ .Values.ingressGrpc.className }}
+  {{- end }}
+  {{- if .Values.ingressGrpc.tls }}
+  tls:
+    {{- range .Values.ingressGrpc.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.ingressGrpc.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            {{- if eq $ingressApiVersion "networking.k8s.io/v1" }}
+            pathType: {{ .pathType | default "Prefix" }}
+            {{- end }}
+            backend:
+              {{- if eq $ingressApiVersion "networking.k8s.io/v1" }}
+              service:
+                name: {{ printf "%s-%s" $.Release.Name .service }}
+                port:
+                  number: {{ .port }}
+              {{- else }}
+              serviceName: {{ printf "%s-%s" $.Release.Name .service }}
+              servicePort: {{ .port }}
+              {{- end }}
+          {{- end }}
+    {{- end }}
+{{- end }}
